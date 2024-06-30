@@ -189,19 +189,26 @@
                             $("#msg").show();
                             if (response['signal'] == 'ok') {
                                 $("#password").val("");
-                                window.location.replace("http://www." + my_slice);
                                 $('#msg_text').html(response['msg']);
+                                setTimeout(function() {
+                                    location.reload();
+                                }, 2000);
                             } else {
                                 $('#msg_text').html(response['msg']);
+                                setTimeout(function() {
+                                    location.reload();
+                                }, 2000);
                             }
                         }
                     },
                     error: function (xhr, status, error) {
                         console.log('Error occurred:', error);
                         $("#password").val("");
-                        window.location.replace("http://www." + my_slice);
                         $("#msg").show();
                         $('#msg_text').html("Please try again later");
+                        setTimeout(function() {
+                            location.reload();
+                        }, 2000);
                     },
                     complete: function () {
                         $('#submit-btn').html('Login');
